@@ -1,6 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
+
+
+
 import bcrypt from "bcrypt";
+
+import dotenv from "dotenv";
+dotenv.config()
+
 
 const userSchema  = new Schema({
     username:{
@@ -61,13 +68,15 @@ userSchema.methods.checkPassword = async function (password) {
 
 // both are jwt tokens
 userSchema.methods.generateAccessToken =  function(){
-    const payload = { _id:this._id , email:this.email , username:this.username , fullName:this.fullName  }
-    return jwt.sign(payload , process.env.ACCESS_TOKEN_SECRET , {expiresIn:process.env.ACCESS_TOKEN_EXPIRY})
+    const token = jwt.sign({_id:this._id , email:this.email , username:this.username , fullName:this.fullName} , process.env.ACCESS_TOKEN_SECRET , {expiresIn:"1d"} )
+    return token
 }
-userSchema.methods.generateRefreshToken = async ()=>{
-    const payload = { _id:this._id  }
-    return jwt.sign(payload , process.env.REFRESH_TOKEN_SECRET , {expiresIn:process.env.REFRESH_TOKEN_EXPIRY})
+userSchema.methods.generateRefreshToken =  function(){
+    const token  = jwt.sign({_id:this._id} , process.env.REFRESH_TOKEN_SECRET  , {expiresIn:"10d"})
+    return token
 }
 
 
 export const User = mongoose.model( 'User', userSchema );
+
+// {expiresIn:process.env.ACCESS_TOKEN_EXPIRY}
